@@ -130,8 +130,10 @@ alias lsa='ls -a'
 alias vimrc='vim ~/.vimrc'
 alias bashrc='vim ~/.bashrc'
 alias loadbash='source ~/.bashrc'
-# Give grep some colors
-export GREP_OPTIONS=' - color=auto'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias .....='cd ../../../..'
 # set Vim as default editor
 export EDITOR=vim
 #==============================
@@ -146,7 +148,11 @@ get_short_path(){
     #this can probably be done prettier, but this should work for now
     echo $(pwd | sed 's@'"/mnt/c/Users/Jerom"'@=@' | sed 's@'"$HOME"'@~@')
 }
+get_git_branch(){
+    git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
+}
 #no color version
-#export PS1="\u@\h\$(get_short_path)> "
+#export PS1="[\u@\h\$(get_short_path)]$ "
 #big unreadable one with colors
-export PS1="\[\e[34m\][\[\e[32m\]\u@\h\[\e[m\]:\[\e[36m\]\$(get_short_path)\[\e[34m\]]\[\e[m\]$ "
+export PS1="\[\e[34m\][\[\e[32m\]\u@\h\[\e[m\]:\[\e[36m\]\$(get_short_path)\[\e[35m\]\$(get_git_branch)\[\e[34m\]]\[\e[m\]$ "
+
