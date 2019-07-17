@@ -134,8 +134,16 @@ alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 alias .....='cd ../../../..'
+#prompts for copying over files
+alias cp='/bin/cp -i'
+alias mv='/bin/mv -i'
+alias rm='/bin/rm -i'
+
 # set Vim as default editor
 export EDITOR=vim
+
+#if no arguments are supplied to git, then print the git status
+alias gits='git status --short --branch'
 #==============================
 # WSL settings
 #==============================
@@ -148,11 +156,31 @@ get_short_path(){
     #this can probably be done prettier, but this should work for now
     echo $(pwd | sed 's@'"/mnt/c/Users/Jerom"'@=@' | sed 's@'"$HOME"'@~@')
 }
-get_git_branch(){
-    git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
+
+get_git_string(){
+	BRANCH=$(git branch 2> /dev/null | sed -e '/^[^*]/d' | awk '{print $2}') 
+	if [[ -n "${BRANCH}" ]]; 
+	then 
+		MODIFIED=$(git status --short 2> /dev/null) 
+		if [[ -n "${MODIFIED}" ]];
+		then 
+			BRANCH="${BRANCH} *" 
+		fi 
+		echo "(${BRANCH})" 
+	fi 
 }
 #no color version
 #export PS1="[\u@\h\$(get_short_path)]$ "
 #big unreadable one with colors
-export PS1="\[\e[34m\][\[\e[32m\]\u@\h\[\e[m\]:\[\e[36m\]\$(get_short_path)\[\e[35m\]\$(get_git_branch)\[\e[34m\]]\[\e[m\]$ "
+#color shortcuts
+reset="\[\e[m\]"
+red="\[\e[31m\]"
+green="\[\e[32m\]"
+yellow="\[\e[33m\]"
+purple="\[\e[34m\]"
+pink="\[\e[35m\]"
+blue="\[\e[36m\]"
+white="\[\e[37m\]"
+
+export PS1="${purple}[${green}\u@\h${reset}:${blue}\$(get_short_path)${pink}\$(get_git_string)${purple}]${reset}$ "
 
