@@ -144,31 +144,22 @@ export EDITOR=vim
 
 #if no arguments are supplied to git, then print the git status
 alias gits='git status --short --branch'
-#==============================
-# WSL settings
-#==============================
-alias home='cd /mnt/c/Users/Jerom/'
-alias source='cd /mnt/c/Users/Jerom/source'
-alias dtop='cd /mnt/c/Users/Jerom/Desktop'
-alias linux='cd /mnt/c/Users/Jerom/linux'
+
 #change ps1 on wsl, so it doesn't write out the entire path from mnt to users
 get_short_path(){
     #this can probably be done prettier, but this should work for now
     echo $(pwd | sed 's@'"/mnt/c/Users/Jerom"'@=@' | sed 's@'"$HOME"'@~@')
 }
 
-get_git_string(){
-	BRANCH=$(git branch 2> /dev/null | sed -e '/^[^*]/d' | awk '{print $2}') 
-	if [[ -n "${BRANCH}" ]]; 
-	then 
-		MODIFIED=$(git status --short 2> /dev/null) 
-		if [[ -n "${MODIFIED}" ]];
-		then 
-			BRANCH="${BRANCH} *" 
-		fi 
-		echo "(${BRANCH})" 
-	fi 
+#i need to get a better git string :P, this one is realy slow on large projects
+function parse_git_dirty {
+	[[ $(git status 2> /dev/null | tail -n1) != "nothing to commit (working directory clean)" ]] && echo "*"
 }
+
+function parse_git_branch {
+	git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e "s/* \(.*\)/[\1$(parse_git_dirty)]/"
+}
+
 #no color version
 #export PS1="[\u@\h\$(get_short_path)]$ "
 #big unreadable one with colors
@@ -182,5 +173,18 @@ pink="\[\e[35m\]"
 blue="\[\e[36m\]"
 white="\[\e[37m\]"
 
-export PS1="${purple}[${green}\u@\h${reset}:${blue}\$(get_short_path)${pink}\$(get_git_string)${purple}]${reset}$ "
+export PS1="${purple}[${green}\u@\h${reset}:${blue}\$(get_short_path)${pink}\$(parse_git_branch)${purple}]${reset}$ "
 
+#windows exclusive stuff
+if [[ "$(< /proc/sys/kernel/osrelease)" == *microsoft* ]]; then
+    #==============================
+    # WSL settings
+    #==============================
+    alias home='cd /mnt/c/Users/Jerom/'
+    alias source='cd /mnt/c/source'
+    alias dtop='cd /mnt/c/Users/Jerom/Desktop'
+    alias linux='cd /mnt/c/Users/Jerom/linux'
+
+    export DISPLAY=$(tail -1 /etc/resolv.conf | cut -d' ' -f2):0
+    export LIBGL_ALWAYS_INDIRECT=1
+fi
